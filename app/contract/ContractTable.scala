@@ -10,7 +10,7 @@ class Contracts(tag: Tag) extends Table[Contract](tag, "contracts") {
   def startDate    = column[Timestamp]("start_date")
   def endDate      = column[Option[Timestamp]]("end_date")
   def contractType = column[String]("contract_type")
-  def contractTime = column[Boolean]("contract_time")
+  def contractTime = column[String]("contract_time")
   def hoursWeek    = column[Int]("hours_week")
 
 

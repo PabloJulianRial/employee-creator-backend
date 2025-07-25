@@ -8,6 +8,6 @@ case class Contract(
                      startDate:    Timestamp,
                      endDate:      Option[Timestamp],
                      contractType: String,
-                     contractTime: Boolean,
+                     contractTime: String,
                      hoursWeek:    Int
                    )
