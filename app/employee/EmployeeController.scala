@@ -1,41 +1,26 @@
 package employee
 
-import javax.inject._
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
-
-import play.api.libs.json._
+import play.api.libs.json.Json
 import play.api.mvc._
 
 @Singleton
 class EmployeeController @Inject()(
                                     cc: ControllerComponents,
-                                    repo: EmployeeRepository
+                                    service: EmployeeService
                                   )(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
   def getAllEmployees: Action[AnyContent] = Action.async {
+    service.getAllEmployees().map { dtos =>
+      Ok(Json.toJson(dtos))
+    }
+  }
 
-    repo.findAll().map { employees =>
-
-      val json = JsArray(
-        employees.map { e =>
-          Json.obj(
-            "id"            -> e.id,
-            "firstName"     -> e.firstName,
-            "lastName"      -> e.lastName,
-            "email"         -> e.email,
-            "mobileNumber"  -> e.mobileNumber,
-            "address"       -> e.address,
-            "contractStart" -> e.contractStart.toString,
-            "contractType"  -> e.contractType,
-            "contractTime"  -> e.contractTime,
-            "contractEnd"   -> e.contractEnd.map(_.toString),
-            "hoursPerWeek"  -> e.hoursPerWeek,
-            "createdAt"     -> e.createdAt.toInstant.toString,
-            "updatedAt"     -> e.updatedAt.toInstant.toString
-          )
-        }
-      )
-      Ok(json)
+  def getEmployeeById(id: Long): Action[AnyContent] = Action.async {
+    service.getEmployeeById(id).map {
+      case Right(dto)  => Ok(Json.toJson(dto))
+      case Left(error) => error.toResult
     }
   }
 }

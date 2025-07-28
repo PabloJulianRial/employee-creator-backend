@@ -1,7 +1,6 @@
 package employee
 
 import java.sql.{Date, Timestamp}
-import slick.jdbc.MySQLProfile.api._
 
 case class Employee(
                      id: Option[Long] = None,
