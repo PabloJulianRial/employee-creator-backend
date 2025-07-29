@@ -1,6 +1,6 @@
 package utils
 
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, Json}
 import play.api.mvc.{Result, Results}
 
 sealed trait ApiError {
@@ -20,9 +20,17 @@ object ApiError {
       Results.NotFound(Json.obj("error" -> message))
   }
 
-  case class InternalServerError(message: String) extends ApiError {
-    def toResult: Result =
-      Results.InternalServerError(Json.obj("error" -> message))
+  case class InvalidJson(errors: JsError) extends ApiError {
+
+    def message: String = "Invalid JSON"
+
+    def toResult: Result = {
+      val errorDetails = JsError.toJson(errors)
+      Results.BadRequest(Json.obj(
+        "error" -> message,
+        "details" -> errorDetails
+      ))
+    }
   }
 
   case class ValidationError(errors: Map[String, String]) extends ApiError {
@@ -33,4 +41,5 @@ object ApiError {
         "validation_errors" -> errors
       ))
   }
-}
+
+ }

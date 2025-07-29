@@ -23,12 +23,10 @@ class EmployeeRepository @Inject()(
   def findById(id: Long): Future[Option[Employee]] =
     db.run(employees.filter(_.id === id).result.headOption)
 
-  def create(emp: Employee): Future[Employee] = {
+  def create(employee: Employee): Future[Employee] = {
     val insertQuery =
-      employees
-        .returning(employees.map(_.id))
-        .into((row, newId) => row.copy(id = Some(newId)))
+      employees returning employees.map(_.id) into((employee, id) => employee.copy(id = Some(id)))
 
-    db.run(insertQuery += emp)
+    db.run(insertQuery += employee)
   }
 }

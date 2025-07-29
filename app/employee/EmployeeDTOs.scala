@@ -21,7 +21,7 @@ case class EmployeeResponse(
 object EmployeeResponse {
   implicit val format: OFormat[EmployeeResponse] = Json.format[EmployeeResponse]
 
-  def fromModel(model: Employee): EmployeeResponse = {
+  def fromModel(model: Employee): EmployeeResponse =
     EmployeeResponse(
       id            = model.id.getOrElse(0L),
       firstName     = model.firstName,
@@ -37,5 +37,21 @@ object EmployeeResponse {
       createdAt     = model.createdAt.toString,
       updatedAt     = model.updatedAt.toString
     )
-  }
+}
+
+case class CreateEmployeeDto(
+                              firstName: String,
+                              lastName: String,
+                              email: String,
+                              mobileNumber: Option[String],
+                              address: Option[String],
+                              contractStart: String,
+                              contractType: String,
+                              contractTime: String,
+                              contractEnd: Option[String],
+                              hoursPerWeek: Int
+                            )
+
+object CreateEmployeeDto {
+  implicit val reads: Reads[CreateEmployeeDto] = Json.reads[CreateEmployeeDto]
 }
