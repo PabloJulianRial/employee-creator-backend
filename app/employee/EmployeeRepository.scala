@@ -29,4 +29,26 @@ class EmployeeRepository @Inject()(
 
     db.run(insertQuery += employee)
   }
+
+  def update(employee: Employee): Future[Employee] = {
+    val query = employees.filter(_.id === employee.id.get)
+      .map(c => (
+        c.firstName, c.lastName, c.email,
+        c.mobileNumber, c.address,
+        c.contractStart, c.contractType, c.contractTime,
+        c.contractEnd, c.hoursPerWeek, c.updatedAt
+      ))
+      .update((
+        employee.firstName, employee.lastName, employee.email,
+        employee.mobileNumber, employee.address,
+        employee.contractStart, employee.contractType, employee.contractTime,
+        employee.contractEnd, employee.hoursPerWeek, employee.updatedAt
+      ))
+
+    db.run(query).map(_ => employee)
+  }
+  def delete(id: Long): Future[Int] = {
+    db.run(employees.filter(_.id === id).delete)
+  }
+
 }

@@ -10,4 +10,12 @@ object EmployeeValidator extends Validator {
       isNotEmpty("email",     dto.email)
     ).flatten.toMap
   }
+  def validatePatch(dto: UpdateEmployeeDto): Map[String, String] = {
+    List(
+      isNonBlankIfDefined("firstName", dto.firstName),
+      isNonBlankIfDefined("lastName",  dto.lastName),
+      isNonBlankIfDefined("email",     dto.email)
+    ).flatten.toMap
+  }
+
 }
