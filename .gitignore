@@ -27,3 +27,6 @@ logs/
 *.log
 *.pid
 *.seed
+
+# real Play config (contains secrets)
+conf/application.conf
