@@ -1,19 +1,32 @@
 # --- !Ups
+
 CREATE TABLE employees (
-  id               INT AUTO_INCREMENT PRIMARY KEY,
-  first_name       VARCHAR(100) NOT NULL,
-  last_name        VARCHAR(100) NOT NULL,
-  email            VARCHAR(255) NOT NULL,
-  mobile_number    VARCHAR(50),
-  address          VARCHAR(500),
-  contract_start   DATE NOT NULL,
-  contract_type    VARCHAR(255) NOT NULL,
-  full_time        VARCHAR(255) NOT NULL,
-  contract_end     DATE,
-  hours_per_week   INT          NOT NULL,
-  created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(100) NOT NULL,
+  last_name  VARCHAR(100) NOT NULL,
+  email      VARCHAR(255) NOT NULL UNIQUE,
+  mobile     VARCHAR(50),
+  address    VARCHAR(255),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE contracts (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  employee_id BIGINT NOT NULL,
+  contract_start DATE NOT NULL,
+  contract_end   DATE NULL,
+  contract_type  VARCHAR(50) NOT NULL,
+  contract_time  VARCHAR(50) NOT NULL,
+  salary         BIGINT NULL,
+  hours_per_week INT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (employee_id) REFERENCES employees(id)
+  ON DELETE CASCADE
 );
 
 # --- !Downs
-DROP TABLE employees;
+
+DROP TABLE IF EXISTS contracts;
+DROP TABLE IF EXISTS employees;

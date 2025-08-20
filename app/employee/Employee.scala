@@ -16,4 +16,5 @@ case class Employee(
                      hoursPerWeek: Int,
                      createdAt: Timestamp,
                      updatedAt: Timestamp
-                   )
+
+)
