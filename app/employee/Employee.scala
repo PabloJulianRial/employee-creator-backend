@@ -1,20 +1,14 @@
 package employee
 
-import java.sql.{Date, Timestamp}
+import java.sql.Timestamp
 
 case class Employee(
-                     id: Option[Long] = None,
+                     id: Option[Long],
                      firstName: String,
                      lastName: String,
                      email: String,
-                     mobileNumber: Option[String],
+                     mobile: Option[String],
                      address: Option[String],
-                     contractStart: Date,
-                     contractType: String,
-                     contractTime: String,
-                     contractEnd: Option[Date],
-                     hoursPerWeek: Int,
-                     createdAt: Timestamp,
-                     updatedAt: Timestamp
-
-)
+                     createdAt: Option[Timestamp] = None,
+                     updatedAt: Option[Timestamp] = None
+                   )
