@@ -9,6 +9,6 @@ case class Employee(
                      email: String,
                      mobile: Option[String],
                      address: Option[String],
-                     createdAt: Option[Timestamp] = None,
-                     updatedAt: Option[Timestamp] = None
+                     createdAt: Timestamp,
+                     updatedAt: Timestamp
                    )

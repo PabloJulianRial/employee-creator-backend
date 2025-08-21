@@ -1,4 +1,5 @@
 package contract
+
 import java.sql.{Date, Timestamp}
 
 case class Contract(
@@ -10,6 +11,6 @@ case class Contract(
                      contractTime: String,
                      salary: Option[Long],
                      hoursPerWeek: Option[Int],
-                     createdAt: Option[Timestamp] = None,
-                     updatedAt: Option[Timestamp] = None
+                     createdAt: Timestamp,
+                     updatedAt: Timestamp
                    )
