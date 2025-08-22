@@ -57,3 +57,14 @@ object EmployeeResponse {
 
     )
 }
+
+case class CreateEmployeeDto(
+                              firstName: String,
+                              lastName: String,
+                              email: String,
+                              mobileNumber: Option[String],
+                              address: Option[String]
+                            )
+object CreateEmployeeDto {
+  implicit val reads: Reads[CreateEmployeeDto] = Json.reads[CreateEmployeeDto]
+}

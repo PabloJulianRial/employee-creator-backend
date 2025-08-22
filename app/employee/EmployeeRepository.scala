@@ -19,4 +19,18 @@ class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
   def findById(id: Long): Future[Option[Employee]] =
     db.run(employees.filter(_.id === id).result.headOption)
 
+  def create(employee: Employee): Future[Either[utils.validation.ApiError, Long]] = {
+    val now = new java.sql.Timestamp(System.currentTimeMillis())
+    val row = employee.copy(id = None, createdAt = now, updatedAt = now)
+
+    val action = (employees returning employees.map(_.id)) += row
+
+    db.run(action.asTry).map {
+      case scala.util.Success(newId) => Right(newId)
+      case scala.util.Failure(ex)    =>
+         Left(utils.validation.ApiError.BadRequest(ex.getMessage))
+    }
+  }
+
+
 }

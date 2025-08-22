@@ -22,6 +22,20 @@ class EmployeeController @Inject()(
     }
   }
 
+  def createEmployee: Action[JsValue] = Action.async(parse.json) { req =>
+    req.body.validate[CreateEmployeeDto].fold(
+      errs => scala.concurrent.Future.successful(
+        utils.validation.ApiError.InvalidJson(JsError(errs)).toResult
+      ),
+      dto  => service.createEmployee(dto).map {
+        case Right(id)  => Created(Json.obj("id" -> id))
+        case Left(err)  => err.toResult
+      }
+    )
+  }
+
+
+
 
 
 }

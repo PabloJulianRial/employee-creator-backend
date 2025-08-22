@@ -38,6 +38,19 @@ class EmployeeService @Inject()(
     }
   }
 
+  def createEmployee(dto: CreateEmployeeDto): Future[Either[utils.validation.ApiError, Long]] = {
+    val model = Employee(
+      id        = None,
+      firstName = dto.firstName.trim,
+      lastName  = dto.lastName.trim,
+      email     = dto.email.trim.toLowerCase,
+      mobile    = dto.mobileNumber.map(_.trim).filter(_.nonEmpty),
+      address   = dto.address.map(_.trim).filter(_.nonEmpty),
+      createdAt = new java.sql.Timestamp(0L),
+      updatedAt = new java.sql.Timestamp(0L)
+    )
+    employeeRepository.create(model)
+  }
 
 
 }
