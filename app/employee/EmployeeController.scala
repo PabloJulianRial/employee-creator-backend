@@ -12,6 +12,16 @@ class EmployeeController @Inject()(
                                   )(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
   def getAllEmployees: Action[AnyContent] = Action.async {
-    service.getAllEmployees().map(rows => Ok(Json.toJson(rows)))
+    service.getAllEmployees().map(dtos => Ok(Json.toJson(dtos)))
   }
+
+  def getEmployeeById(id: Long): Action[AnyContent] = Action.async {
+    service.getEmployeeById(id).map {
+      case Right(dto)  => Ok(Json.toJson(dto))
+      case Left(error) => error.toResult
+    }
+  }
+
+
+
 }

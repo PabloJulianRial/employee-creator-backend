@@ -1,2 +1,3 @@
 GET    /       home.HomeController.index
 GET   /employees    employee.EmployeeController.getAllEmployees
+GET   /employees/:id    employee.EmployeeController.getEmployeeById(id: Long)

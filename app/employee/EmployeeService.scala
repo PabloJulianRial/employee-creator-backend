@@ -3,6 +3,7 @@ package employee
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import contract.ContractRepository
+import utils.validation.ApiError
 
 @Singleton
 class EmployeeService @Inject()(
@@ -24,5 +25,19 @@ class EmployeeService @Inject()(
       Future.sequence(futures)
     }
   }
+
+  def getEmployeeById(id: Long): Future[Either[ApiError, EmployeeResponse]] = {
+    employeeRepository.findById(id).flatMap {
+      case None =>
+        Future.successful(Left(ApiError.NotFound(s"Employee with id $id not found")))
+      case Some(emp) =>
+        contractRepository.findByEmployeeId(emp.id.getOrElse(0L)).map {
+          case Some(c) => Right(EmployeeResponse.fromModels(emp, c))
+          case None    => Right(EmployeeResponse.fromModel(emp))
+        }
+    }
+  }
+
+
 
 }
