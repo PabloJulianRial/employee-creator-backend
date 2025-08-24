@@ -4,3 +4,4 @@ GET   /employees/:id    employee.EmployeeController.getEmployeeById(id: Long)
 POST  /employees   employee.EmployeeController.createEmployee
 PUT   /employees/:id   employee.EmployeeController.updateEmployee(id: Long)
 DELETE  /employees/:id   employee.EmployeeController.deleteEmployee(id: Long)
+GET    /employees/:id/contracts  employee.EmployeeController.getEmployeeContracts(id: Long)

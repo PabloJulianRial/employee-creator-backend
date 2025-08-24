@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import play.api.libs.json._
 import scala.concurrent.{ExecutionContext, Future}
-
+import contract.ContractResponse
 
 @Singleton
 class EmployeeController @Inject()(
@@ -49,6 +49,12 @@ class EmployeeController @Inject()(
     service.deleteEmployeeById(id).map {
       case Right(_)     => NoContent
       case Left(error)  => error.toResult
+    }
+  }
+
+  def getEmployeeContracts(id: Long): Action[AnyContent] = Action.async {
+    service.getAllEmployeeContracts(id).map { dtos =>
+      Ok(Json.toJson(dtos))
     }
   }
 

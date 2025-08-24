@@ -6,6 +6,9 @@ import contract.ContractRepository
 import utils.validation.ApiError
 import java.sql.Timestamp
 import java.time.Instant
+import contract.ContractResponse
+
+
 
 @Singleton
 class EmployeeService @Inject()(
@@ -17,13 +20,11 @@ class EmployeeService @Inject()(
     employeeRepository.findAll().flatMap { employees =>
       val futures: Seq[Future[EmployeeResponse]] = employees.map { e =>
         val id = e.id.getOrElse(0L)
-
         contractRepository.findByEmployeeId(id).map {
-          case Some(c) => EmployeeResponse.fromModels(e, c)
-          case None    => EmployeeResponse.fromModel(e)
+          case c +: _ => EmployeeResponse.fromModels(e, c)
+          case _ => EmployeeResponse.fromModel(e)
         }
       }
-
       Future.sequence(futures)
     }
   }
@@ -33,9 +34,10 @@ class EmployeeService @Inject()(
       case None =>
         Future.successful(Left(ApiError.NotFound(s"Employee with id $id not found")))
       case Some(emp) =>
-        contractRepository.findByEmployeeId(emp.id.getOrElse(0L)).map {
-          case Some(c) => Right(EmployeeResponse.fromModels(emp, c))
-          case None    => Right(EmployeeResponse.fromModel(emp))
+        val empId = emp.id.getOrElse(0L)
+        contractRepository.findByEmployeeId(empId).map {
+          case c +: _ => Right(EmployeeResponse.fromModels(emp, c))
+          case _ => Right(EmployeeResponse.fromModel(emp))
         }
     }
   }
@@ -90,6 +92,10 @@ class EmployeeService @Inject()(
       if (rowsAffected > 0) Right(())
       else Left(ApiError.NotFound(s"Employee with id $id not found"))
     }
+  }
+
+  def getAllEmployeeContracts(id: Long): Future[Seq[ContractResponse]] = {
+    contractRepository.findByEmployeeId(id).map(_.map(ContractResponse.fromModel))
   }
 
 }

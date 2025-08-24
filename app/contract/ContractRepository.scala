@@ -13,6 +13,10 @@ class ContractRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
 
   private val contracts = Table.contracts
 
-  def findByEmployeeId(employeeId: Long): Future[Option[Contract]] =
-    db.run(contracts.filter(_.employeeId === employeeId).result.headOption)
+  def findByEmployeeId(employeeId: Long): Future[Seq[Contract]] =
+    db.run(
+      contracts
+        .filter(_.employeeId === employeeId)
+        .result
+    )
 }
