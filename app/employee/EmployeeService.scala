@@ -85,4 +85,11 @@ class EmployeeService @Inject()(
       }
     }
 
+  def deleteEmployeeById(id: Long): Future[Either[ApiError, Unit]] = {
+    employeeRepository.delete(id).map { rowsAffected =>
+      if (rowsAffected > 0) Right(())
+      else Left(ApiError.NotFound(s"Employee with id $id not found"))
+    }
+  }
+
 }

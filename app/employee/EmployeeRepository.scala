@@ -41,7 +41,7 @@ class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
     db.run(query).map(_ => employee)
   }
 
-
-
-
+  def delete(id: Long): Future[Int] = {
+    db.run(employees.filter(_.id === id).delete)
+  }
 }
