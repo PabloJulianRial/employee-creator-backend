@@ -32,3 +32,14 @@ object ContractResponse {
       updatedAt     = c.updatedAt.toString
     )
 }
+case class CreateContractDto(
+                              contractStart: String,
+                              contractEnd: Option[String],
+                              contractType: String,
+                              contractTime: String,
+                              salary: Option[Long],
+                              hoursPerWeek: Option[Int]
+                            )
+object CreateContractDto {
+  implicit val reads: Reads[CreateContractDto] = Json.reads[CreateContractDto]
+}

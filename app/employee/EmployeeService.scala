@@ -98,4 +98,38 @@ class EmployeeService @Inject()(
     contractRepository.findByEmployeeId(id).map(_.map(ContractResponse.fromModel))
   }
 
+  def createContractForEmployee(
+                                 employeeId: Long,
+                                 dto: contract.CreateContractDto
+                               ): Future[Either[ApiError, contract.ContractResponse]] = {
+
+    employeeRepository.findById(employeeId).flatMap {
+      case None =>
+        Future.successful(Left(ApiError.NotFound(s"Employee with id $employeeId not found")))
+      case Some(_) =>
+        val now   = new java.sql.Timestamp(System.currentTimeMillis())
+        val start = java.sql.Date.valueOf(dto.contractStart)
+        val end   = dto.contractEnd.map(java.sql.Date.valueOf)
+
+        val model = contract.Contract(
+          id            = None,
+          employeeId    = employeeId,
+          contractStart = start,
+          contractEnd   = end,
+          contractType  = dto.contractType.trim,
+          contractTime  = dto.contractTime.trim,
+          salary        = dto.salary,
+          hoursPerWeek  = dto.hoursPerWeek,
+          createdAt     = now,
+          updatedAt     = now
+        )
+
+        contractRepository
+          .create(model)
+          .map(saved => Right(contract.ContractResponse.fromModel(saved)))
+          .recover { case ex => Left(ApiError.BadRequest(ex.getMessage)) }
+    }
+  }
+
+
 }

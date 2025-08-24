@@ -4,8 +4,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import play.api.libs.json._
 import scala.concurrent.{ExecutionContext, Future}
-import contract.ContractResponse
-
+import contract.CreateContractDto
 @Singleton
 class EmployeeController @Inject()(
                                     cc: ControllerComponents,
@@ -56,6 +55,16 @@ class EmployeeController @Inject()(
     service.getAllEmployeeContracts(id).map { dtos =>
       Ok(Json.toJson(dtos))
     }
+  }
+
+  def createEmployeeContract(id: Long): Action[JsValue] = Action.async(parse.json) { req =>
+    req.body.validate[CreateContractDto].fold(
+      errs => Future.successful(utils.validation.ApiError.InvalidJson(JsError(errs)).toResult),
+      dto  => service.createContractForEmployee(id, dto).map {
+        case Right(out) => Created(Json.toJson(out))
+        case Left(err)  => err.toResult
+      }
+    )
   }
 
 
