@@ -2,3 +2,4 @@ GET    /       home.HomeController.index
 GET   /employees    employee.EmployeeController.getAllEmployees
 GET   /employees/:id    employee.EmployeeController.getEmployeeById(id: Long)
 POST  /employees   employee.EmployeeController.createEmployee
+PUT   /employees/:id   employee.EmployeeController.updateEmployee(id: Long)

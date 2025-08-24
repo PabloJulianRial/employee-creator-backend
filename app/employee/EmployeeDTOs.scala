@@ -68,3 +68,14 @@ case class CreateEmployeeDto(
 object CreateEmployeeDto {
   implicit val reads: Reads[CreateEmployeeDto] = Json.reads[CreateEmployeeDto]
 }
+
+case class UpdateEmployeeDto(
+                              firstName: Option[String],
+                              lastName: Option[String],
+                              email: Option[String],
+                              mobileNumber: Option[String],
+                              address: Option[String]
+                            )
+object UpdateEmployeeDto {
+  implicit val reads: Reads[UpdateEmployeeDto] = Json.reads[UpdateEmployeeDto]
+}

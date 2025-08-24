@@ -3,7 +3,8 @@ package employee
 import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import play.api.libs.json._
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
+
 
 @Singleton
 class EmployeeController @Inject()(
@@ -28,11 +29,22 @@ class EmployeeController @Inject()(
         utils.validation.ApiError.InvalidJson(JsError(errs)).toResult
       ),
       dto  => service.createEmployee(dto).map {
-        case Right(id)  => Created(Json.obj("id" -> id))
-        case Left(err)  => err.toResult
+        case Right(empDto) => Created(Json.toJson(empDto))
+        case Left(err)     => err.toResult
       }
     )
   }
+
+  def updateEmployee(id: Long): Action[JsValue] = Action.async(parse.json) { req =>
+    req.body.validate[UpdateEmployeeDto].fold(
+      errs => Future.successful(utils.validation.ApiError.InvalidJson(JsError(errs)).toResult),
+      dto  => service.updateEmployeeById(id, dto).map {
+        case Right(dtoOut) => Ok(Json.toJson(dtoOut))
+        case Left(err)     => err.toResult
+      }
+    )
+  }
+
 
 
 
