@@ -67,5 +67,12 @@ class EmployeeController @Inject()(
     )
   }
 
+  def deleteEmployeeContract(empId: Long, contractId: Long): Action[AnyContent] = Action.async {
+    service.deleteContractForEmployee(empId, contractId).map {
+      case Right(_)   => NoContent
+      case Left(err)  => err.toResult
+    }
+  }
+
 
 }

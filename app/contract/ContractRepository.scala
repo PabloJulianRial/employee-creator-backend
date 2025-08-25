@@ -30,4 +30,20 @@ class ContractRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
     db.run(insert += c)
   }
 
+  def findByIdForEmployee(employeeId: Long, contractId: Long): Future[Option[Contract]] =
+    db.run(
+      contracts
+        .filter(c => c.id === contractId && c.employeeId === employeeId)
+        .result
+        .headOption
+    )
+
+  def delete(employeeId: Long, contractId: Long): Future[Int] =
+    db.run(
+      contracts
+        .filter(c => c.id === contractId && c.employeeId === employeeId)
+        .delete
+    )
+
+
 }

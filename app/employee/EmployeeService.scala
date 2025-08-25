@@ -131,5 +131,14 @@ class EmployeeService @Inject()(
     }
   }
 
+  def deleteContractForEmployee(
+                                 employeeId: Long,
+                                 contractId: Long
+                               ): Future[Either[ApiError, Unit]] = {
+    contractRepository.delete(employeeId, contractId).map { rows =>
+      if (rows > 0) Right(()) else Left(ApiError.NotFound(s"Contract $contractId for employee $employeeId not found"))
+    }
+  }
+
 
 }
