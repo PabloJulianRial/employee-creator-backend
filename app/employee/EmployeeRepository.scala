@@ -44,4 +44,10 @@ class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(imp
   def delete(id: Long): Future[Int] = {
     db.run(employees.filter(_.id === id).delete)
   }
+
+  def findByEmail(email: String): Future[Option[Employee]] =
+    db.run(employees.filter(_.email === email).result.headOption)
+
+
+
 }

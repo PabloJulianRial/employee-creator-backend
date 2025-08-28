@@ -47,20 +47,23 @@ class EmployeeService @Inject()(
     if (errors.nonEmpty) {
       Future.successful(Left(ApiError.ValidationError(errors)))
     } else {
-      val now = Timestamp.from(Instant.now())
-      val preSaved = Employee(
-        id = None,
-        firstName = data.firstName.trim,
-        lastName = data.lastName.trim,
-        email = data.email.trim,
-        mobile = data.mobileNumber,
-        address = data.address,
-        createdAt = now,
-        updatedAt = now
-      )
-      employeeRepository.create(preSaved).map(saved => Right(EmployeeResponse.fromModel(saved)))
+      employeeRepository.findByEmail(data.email).flatMap {
+        case Some(_) => Future.successful(Left(ApiError.BadRequest("Email already in use")))
+        case None =>
+          val now = Timestamp.from(Instant.now())
+          val preSaved = Employee(
+            id = None,
+            firstName = data.firstName.trim,
+            lastName = data.lastName.trim,
+            email = data.email.trim,
+            mobile = data.mobileNumber,
+            address = data.address,
+            createdAt = now,
+            updatedAt = now
+          )
+          employeeRepository.create(preSaved).map(saved => Right(EmployeeResponse.fromModel(saved)))
+      }
     }
-
   }
 
   def updateEmployeeById(id: Long, data: UpdateEmployeeDto): Future[Either[ApiError, EmployeeResponse]] = {
@@ -139,6 +142,8 @@ class EmployeeService @Inject()(
       if (rows > 0) Right(()) else Left(ApiError.NotFound(s"Contract $contractId for employee $employeeId not found"))
     }
   }
+
+
 
 
 }

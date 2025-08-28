@@ -4,7 +4,7 @@ CREATE TABLE employees (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   first_name VARCHAR(100) NOT NULL,
   last_name  VARCHAR(100) NOT NULL,
-  email      VARCHAR(255) NOT NULL UNIQUE,
+  email      VARCHAR(255) NOT NULL,
   mobile     VARCHAR(50),
   address    VARCHAR(255),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
