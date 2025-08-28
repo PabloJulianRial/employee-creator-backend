@@ -114,6 +114,10 @@ class EmployeeService @Inject()(
         val start = java.sql.Date.valueOf(dto.contractStart)
         val end   = dto.contractEnd.map(java.sql.Date.valueOf)
 
+        val defaultHours =
+          if (dto.contractTime.trim.toLowerCase == "full_time") Some(40)
+          else dto.hoursPerWeek
+
         val model = contract.Contract(
           id            = None,
           employeeId    = employeeId,
@@ -122,7 +126,7 @@ class EmployeeService @Inject()(
           contractType  = dto.contractType.trim,
           contractTime  = dto.contractTime.trim,
           salary        = dto.salary,
-          hoursPerWeek  = dto.hoursPerWeek,
+          hoursPerWeek  = defaultHours,
           createdAt     = now,
           updatedAt     = now
         )
