@@ -147,7 +147,14 @@ class EmployeeService @Inject()(
     }
   }
 
-
-
+  def getContractForEmployee(
+                              employeeId: Long,
+                              contractId: Long
+                            ): Future[Either[ApiError, contract.ContractResponse]] = {
+    contractRepository.findByIdForEmployee(employeeId, contractId).map {
+      case Some(c) => Right(contract.ContractResponse.fromModel(c))
+      case None    => Left(ApiError.NotFound(s"Contract not found"))
+    }
+  }
 
 }

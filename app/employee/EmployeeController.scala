@@ -74,5 +74,13 @@ class EmployeeController @Inject()(
     }
   }
 
+  def getEmployeeContract(empId: Long, contractId: Long): Action[AnyContent] = Action.async {
+    service.getContractForEmployee(empId, contractId).map {
+      case Right(dto) => Ok(Json.toJson(dto))
+      case Left(err)  => err.toResult
+    }
+  }
+
+
 
 }
