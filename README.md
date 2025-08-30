@@ -32,11 +32,21 @@ Evolutions will create the tables automatically.
 
 ## Run the application
 
+## API Endpoints
 
-| Method | Endpoint        | Description                 |
-| ------ | --------------- | --------------------------- |
-| GET    | /employees      | List all employees          |
-| GET    | /employees/:id  | Retrieve an employee by ID  |
-| POST   | /employees      | Create a new employee       |
-| PATCH  | /employees/:id  | Update an existing employee |
-| DELETE | /employees/:id  | Delete an employee          |
+### Employees
+| Method | Endpoint          | Description                 |
+|--------|-------------------|-----------------------------|
+| GET    | /employees        | List all employees          |
+| GET    | /employees/:id    | Retrieve an employee by ID  |
+| POST   | /employees        | Create a new employee       |
+| PUT    | /employees/:id    | Update an existing employee |
+| DELETE | /employees/:id    | Delete an employee          |
+
+### Contracts
+| Method | Endpoint                          | Description                              |
+|--------|-----------------------------------|------------------------------------------|
+| GET    | /employees/:id/contracts          | List all contracts for an employee        |
+| POST   | /employees/:id/contracts          | Create a new contract for an employee     |
+| DELETE | /employees/:id/contracts/:cid     | Delete a contract of an employee |
+

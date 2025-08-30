@@ -2,22 +2,43 @@ package employee
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import java.sql.{Date, Timestamp}
+import contract.ContractRepository
+import utils.validation.ApiError
+import java.sql.Timestamp
 import java.time.Instant
-import utils.ApiError
+import contract.ContractResponse
+
+
 
 @Singleton
 class EmployeeService @Inject()(
-                                 employeeRepository: EmployeeRepository
+                                 employeeRepository: EmployeeRepository,
+                                 contractRepository: ContractRepository
                                )(implicit ec: ExecutionContext) {
 
-  def getAllEmployees(): Future[Seq[EmployeeResponse]] =
-    employeeRepository.findAll().map(_.map(EmployeeResponse.fromModel))
+  def getAllEmployees(): Future[Seq[EmployeeResponse]] = {
+    employeeRepository.findAll().flatMap { employees =>
+      val futures: Seq[Future[EmployeeResponse]] = employees.map { e =>
+        val id = e.id.getOrElse(0L)
+        contractRepository.findByEmployeeId(id).map {
+          case c +: _ => EmployeeResponse.fromModels(e, c)
+          case _ => EmployeeResponse.fromModel(e)
+        }
+      }
+      Future.sequence(futures)
+    }
+  }
 
   def getEmployeeById(id: Long): Future[Either[ApiError, EmployeeResponse]] = {
-    employeeRepository.findById(id).map {
-      case Some(emp) => Right(EmployeeResponse.fromModel(emp))
-      case None      => Left(ApiError.NotFound(s"Employee with id $id not found"))
+    employeeRepository.findById(id).flatMap {
+      case None =>
+        Future.successful(Left(ApiError.NotFound(s"Employee with id $id not found")))
+      case Some(emp) =>
+        val empId = emp.id.getOrElse(0L)
+        contractRepository.findByEmployeeId(empId).map {
+          case c +: _ => Right(EmployeeResponse.fromModels(emp, c))
+          case _ => Right(EmployeeResponse.fromModel(emp))
+        }
     }
   }
 
@@ -26,27 +47,23 @@ class EmployeeService @Inject()(
     if (errors.nonEmpty) {
       Future.successful(Left(ApiError.ValidationError(errors)))
     } else {
-      val now = Timestamp.from(Instant.now())
-      val start = Date.valueOf(data.contractStart)
-      val end = data.contractEnd.map(Date.valueOf)
-      val preSaved = Employee(
-        id = None,
-        firstName = data.firstName.trim,
-        lastName = data.lastName.trim,
-        email = data.email.trim,
-        mobileNumber = data.mobileNumber,
-        address = data.address,
-        contractStart = start,
-        contractType = data.contractType.trim,
-        contractTime = data.contractTime.trim,
-        contractEnd = end,
-        hoursPerWeek = data.hoursPerWeek,
-        createdAt = now,
-        updatedAt = now
-      )
-      employeeRepository.create(preSaved).map(saved => Right(EmployeeResponse.fromModel(saved)))
+      employeeRepository.findByEmail(data.email).flatMap {
+        case Some(_) => Future.successful(Left(ApiError.BadRequest("Email already in use")))
+        case None =>
+          val now = Timestamp.from(Instant.now())
+          val preSaved = Employee(
+            id = None,
+            firstName = data.firstName.trim,
+            lastName = data.lastName.trim,
+            email = data.email.trim,
+            mobile = data.mobileNumber,
+            address = data.address,
+            createdAt = now,
+            updatedAt = now
+          )
+          employeeRepository.create(preSaved).map(saved => Right(EmployeeResponse.fromModel(saved)))
+      }
     }
-
   }
 
   def updateEmployeeById(id: Long, data: UpdateEmployeeDto): Future[Either[ApiError, EmployeeResponse]] = {
@@ -63,24 +80,80 @@ class EmployeeService @Inject()(
             firstName     = data.firstName   .getOrElse(existing.firstName),
             lastName      = data.lastName    .getOrElse(existing.lastName),
             email         = data.email       .getOrElse(existing.email),
-            mobileNumber  = data.mobileNumber.orElse(existing.mobileNumber),
+            mobile        = data.mobileNumber.orElse(existing.mobile),
             address       = data.address     .orElse(existing.address),
-            contractStart = data.contractStart.map(Date.valueOf).getOrElse(existing.contractStart),
-            contractType  = data.contractType.getOrElse(existing.contractType),
-            contractTime  = data.contractTime.getOrElse(existing.contractTime),
-            contractEnd   = data.contractEnd   .map(Date.valueOf).orElse(existing.contractEnd),
-            hoursPerWeek  = data.hoursPerWeek  .getOrElse(existing.hoursPerWeek),
             updatedAt     = now
           )
 
           employeeRepository.update(updated).map(c => Right(EmployeeResponse.fromModel(c)))
+          }
       }
     }
-  }
+
   def deleteEmployeeById(id: Long): Future[Either[ApiError, Unit]] = {
     employeeRepository.delete(id).map { rowsAffected =>
       if (rowsAffected > 0) Right(())
-      else Left(ApiError.NotFound(s"Category with id $id not found"))
+      else Left(ApiError.NotFound(s"Employee with id $id not found"))
+    }
+  }
+
+  def getAllEmployeeContracts(id: Long): Future[Seq[ContractResponse]] = {
+    contractRepository.findByEmployeeId(id).map(_.map(ContractResponse.fromModel))
+  }
+
+  def createContractForEmployee(
+                                 employeeId: Long,
+                                 dto: contract.CreateContractDto
+                               ): Future[Either[ApiError, contract.ContractResponse]] = {
+
+    employeeRepository.findById(employeeId).flatMap {
+      case None =>
+        Future.successful(Left(ApiError.NotFound(s"Employee with id $employeeId not found")))
+      case Some(_) =>
+        val now   = new java.sql.Timestamp(System.currentTimeMillis())
+        val start = java.sql.Date.valueOf(dto.contractStart)
+        val end   = dto.contractEnd.map(java.sql.Date.valueOf)
+
+        val defaultHours =
+          if (dto.contractTime.trim.toLowerCase == "full_time") Some(40)
+          else dto.hoursPerWeek
+
+        val model = contract.Contract(
+          id            = None,
+          employeeId    = employeeId,
+          contractStart = start,
+          contractEnd   = end,
+          contractType  = dto.contractType.trim,
+          contractTime  = dto.contractTime.trim,
+          salary        = dto.salary,
+          hoursPerWeek  = defaultHours,
+          createdAt     = now,
+          updatedAt     = now
+        )
+
+        contractRepository
+          .create(model)
+          .map(saved => Right(contract.ContractResponse.fromModel(saved)))
+          .recover { case ex => Left(ApiError.BadRequest(ex.getMessage)) }
+    }
+  }
+
+  def deleteContractForEmployee(
+                                 employeeId: Long,
+                                 contractId: Long
+                               ): Future[Either[ApiError, Unit]] = {
+    contractRepository.delete(employeeId, contractId).map { rows =>
+      if (rows > 0) Right(()) else Left(ApiError.NotFound(s"Contract $contractId for employee $employeeId not found"))
+    }
+  }
+
+  def getContractForEmployee(
+                              employeeId: Long,
+                              contractId: Long
+                            ): Future[Either[ApiError, contract.ContractResponse]] = {
+    contractRepository.findByIdForEmployee(employeeId, contractId).map {
+      case Some(c) => Right(contract.ContractResponse.fromModel(c))
+      case None    => Left(ApiError.NotFound(s"Contract not found"))
     }
   }
 

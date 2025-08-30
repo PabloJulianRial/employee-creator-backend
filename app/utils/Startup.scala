@@ -1,24 +1,13 @@
 package utils
 
 import javax.inject.{Inject, Singleton}
-import play.api.inject.ApplicationLifecycle
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
+import play.api.Logger
 
 @Singleton
-class Startup @Inject()(
-                         dataSeeder: DataSeeder,
-                         lifecycle: ApplicationLifecycle
-                       )(implicit ec: ExecutionContext) {
-  println("Running DataSeeder on startup")
+class Startup @Inject()(seeder: DataSeeder)(implicit ec: ExecutionContext) {
+  private val log = Logger(this.getClass)
 
-  dataSeeder.seed().map { _ =>
-    println("Seeding employees succeeded")
-  }.recover { case ex =>
-    println(s"Seeding employees failed: ${ex.getMessage}")
-  }
-
-  lifecycle.addStopHook { () =>
-    println("Application shutting down...")
-    Future.successful(())
-  }
+  seeder.seed().map(_ => log.info("Seeding complete"))
+    .recover { case ex => log.error("Seeding failed", ex) }
 }

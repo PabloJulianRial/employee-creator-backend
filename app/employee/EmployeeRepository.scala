@@ -1,16 +1,12 @@
 package employee
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EmployeeRepository @Inject()(
-                                    dbConfigProvider: DatabaseConfigProvider
-                                  )(implicit ec: ExecutionContext) {
-
+class EmployeeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   import dbConfig._
   import profile.api._
@@ -34,21 +30,24 @@ class EmployeeRepository @Inject()(
     val query = employees.filter(_.id === employee.id.get)
       .map(c => (
         c.firstName, c.lastName, c.email,
-        c.mobileNumber, c.address,
-        c.contractStart, c.contractType, c.contractTime,
-        c.contractEnd, c.hoursPerWeek, c.updatedAt
+        c.mobile, c.address, c.updatedAt
       ))
       .update((
         employee.firstName, employee.lastName, employee.email,
-        employee.mobileNumber, employee.address,
-        employee.contractStart, employee.contractType, employee.contractTime,
-        employee.contractEnd, employee.hoursPerWeek, employee.updatedAt
+        employee.mobile, employee.address,
+         employee.updatedAt
       ))
 
     db.run(query).map(_ => employee)
   }
+
   def delete(id: Long): Future[Int] = {
     db.run(employees.filter(_.id === id).delete)
   }
+
+  def findByEmail(email: String): Future[Option[Employee]] =
+    db.run(employees.filter(_.email === email).result.headOption)
+
+
 
 }
