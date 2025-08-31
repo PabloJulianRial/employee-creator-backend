@@ -1,14 +1,24 @@
 # ---- Build stage ----
-FROM hseeberger/scala-sbt:17.0.11_1.10.2_2.13.14 AS build
+FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 
+# Install sbt (official repo)
+RUN apt-get update && apt-get install -y curl gnupg && \
+    echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list && \
+    curl -sL https://repo.scala-sbt.org/scalasbt/debian/scalasbt-release.asc | apt-key add - && \
+    apt-get update && apt-get install -y sbt && \
+    rm -rf /var/lib/apt/lists/*
+
+# Cache sbt deps
 COPY project ./project
 COPY build.sbt ./
-RUN sbt update
+RUN sbt -batch update
 
+# Build the app
 COPY . .
-RUN sbt stage
+RUN sbt -batch stage
 
+# ---- Run stage ----
 FROM eclipse-temurin:17-jre
 WORKDIR /opt/app
 COPY --from=build /app/target/universal/stage ./stage
@@ -16,6 +26,8 @@ COPY --from=build /app/target/universal/stage ./stage
 ENV PORT=10000
 EXPOSE 10000
 
+# JVM tuning picked up automatically
 ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
-CMD ["./stage/bin/employer-creator-backend","-Dplay.http.secret.key=${PLAY_SECRET}","-Dplay.server.http.port=${PORT}","-Dconfig.resource=application.conf"]
+# IMPORTANT: set your real script name below
+CMD ["./stage/bin/<APP_SCRIPT_NAME>","-Dplay.http.secret.key=${PLAY_SECRET}","-Dplay.server.http.port=${PORT}","-Dconfig.resource=application.conf"]
