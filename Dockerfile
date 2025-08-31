@@ -1,3 +1,4 @@
+# ---- Build stage ----
 FROM hseeberger/scala-sbt:17.0.11_1.10.2_2.13.14 AS build
 WORKDIR /app
 
