@@ -23,9 +23,12 @@ FROM eclipse-temurin:17-jre
 WORKDIR /opt/app
 COPY --from=build /app/target/universal/stage ./stage
 
-ENV PORT=10000
+
 EXPOSE 10000
 ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
 # IMPORTANT: replace with the exact script name from target/universal/stage/bin
-CMD ["./stage/bin/employer-creator-backend","-Dplay.http.secret.key=${PLAY_SECRET}","-Dplay.server.http.port=${PORT}","-Dconfig.resource=application.conf"]
+CMD sh -lc './stage/bin/employer-creator-backend \
+  -Dhttp.port="$PORT" \
+  -Dplay.http.secret.key="$PLAY_SECRET" \
+  -Dconfig.resource=application.conf']
