@@ -17,7 +17,4 @@ EXPOSE 10000
 
 ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
-CMD ["./stage/bin/employee-creator-backend",
-     "-Dplay.http.secret.key=${PLAY_SECRET}",
-     "-Dplay.server.http.port=${PORT}",
-     "-Dconfig.resource=application.conf"]
+CMD ["./stage/bin/employer-creator-backend","-Dplay.http.secret.key=${PLAY_SECRET}","-Dplay.server.http.port=${PORT}","-Dconfig.resource=application.conf"]
