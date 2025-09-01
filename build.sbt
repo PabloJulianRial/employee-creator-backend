@@ -4,7 +4,7 @@ ThisBuild / version      := "0.1.0-SNAPSHOT"
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .settings(
-    name := "employer-creator-backend",
+    name := "employee-creator-backend",
 
     libraryDependencies ++= Seq(
       guice,
