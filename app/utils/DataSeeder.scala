@@ -120,18 +120,7 @@ class DataSeeder @Inject()(
          createdAt     = nowTs,
          updatedAt     = nowTs
        ),
-       Contract(
-         id            = None,
-         employeeId    = tonyId,
-         contractStart = Date.valueOf("2023-01-01"),
-         contractEnd   = None,
-         contractType  = "permanent",
-         contractTime  = "full_time",
-         salary        = Some(120000L),
-         hoursPerWeek  = Some(40),
-         createdAt     = nowTs,
-         updatedAt     = nowTs
-       ),
+
        Contract(
          id            = None,
          employeeId    = tonyId,
